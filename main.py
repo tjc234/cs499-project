@@ -36,13 +36,13 @@ def load_dataset():
 
     return train, val, test
 
-# break data into managable pieces
-def split_dataset( dataset ):
-    return None, None, None
-
 # create loaders for each segment of data
-def create_loaders( train_data, val_data, test_data) :
-    return None, None, None
+def create_loaders( train_data, val_data, test_data ):
+    train_loader = DataLoader( train_data, batch_size = 64, shuffle = True )
+    val_loader = DataLoader( val_data, batch_size = 64, shuffle = False )
+    test_loader = DataLoader( test_data, batch_size = 64, shuffle = False )
+
+    return train_loader, val_loader, test_loader
 
 
 # =========================
