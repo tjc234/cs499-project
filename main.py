@@ -10,10 +10,6 @@ from medmnist import PathMNIST
 from torchvision import transforms, models
 from torch.utils.data import DataLoader
 
-# handle random seed generation
-def set_seed():
-    pass
-
 # select device work is being done on
 def get_device():
     return "cpu"
@@ -58,20 +54,31 @@ def build_simple_cnn():
     class SimpleCNN( nn.Module ):
         def __init__( self ):
             super().__init__()
+            #  first conv layer, low level features
             self.conv1 = nn.Conv2d( 1, 16, 3, padding = 1 )
-            self.conv2 = nn.Conv2d( 16, 32, 3, padding = 1 )
+
+            # second conv layer, more complex features
+            self.conv2 = nn.Conv2d( 16, 32, 3, padding = 1 ) 
+
+            # fully connected layer
             self.fc1 = nn.Linear( 32 * 7 * 7, 128 )
-            self.fc2 = nn.Linear( 128, 9 )  # MedMNIST has 9 tissue classes
+
+            # output layer (9 tissue classes)
+            self.fc2 = nn.Linear( 128, 9 ) 
 
         def forward(self, x):
 
-            x = F.relu( self.conv1( x ) )
-            x = F.max_pool2d (x, 2 )
-            x = F.relu( self.conv2( x ))
-            x = F.max_pool2d( x, 2 )
-            x = x.view(x.size( 0 ), -1 )
-            x = F.relu(self.fc1( x ) )
+            x = F.relu( self.conv1( x ) ) # conv + relu activation
+            x = F.max_pool2d ( x, 2 ) # downsample dimensions while retaining features
 
+            # second feature extraction
+            x = F.relu( self.conv2( x )) 
+            x = F.max_pool2d( x, 2 )
+
+            x = x.view(x.size( 0 ), -1 ) # flatten feature maps into vector for fully connected layer
+            x = F.relu(self.fc1( x ) ) # dense feature learning
+
+            # return logits for each class
             return self.fc2( x )
 
     return SimpleCNN()
@@ -79,21 +86,32 @@ def build_simple_cnn():
 # resnet18
 def build_resnet18( pretrained = False ):
 
+    # load resnet18 from torchvision
     model = models.resnet18( pretrained = pretrained )
+
+    # replace final classification layer with 9 tissue class output
     model.fc = nn.Linear( model.fc.in_features, 9 )
 
     return model
 
 # resnet50
 def build_resnet50( pretrained = False ):
+
+    # load resnet50 from torchvision
     model = models.resnet50( pretrained = pretrained )
+
+    # replace final classification layer with 9 tissue class output
     model.fc = nn.Linear( model.fc.in_features, 9 )
     
     return model
 
 # resnet101
 def build_resnet101( pretrained = False ):
+
+    # load resnet101 from torchvision
     model = models.resnet101( pretrained = pretrained )
+
+    # replace final classification layer with 9 tissue class output
     model.fc = nn.Linear( model.fc.in_features, 9 )
     
     return model
@@ -105,15 +123,16 @@ def build_resnet101( pretrained = False ):
 
 # handle loss data
 def get_loss_function():
-    return None
+    return nn.CrossEntropyLoss()
 
 # handle optimization
 def get_optimizer( model ):
-    return None
+    return torch.optim.Adam( model.parameters(), lr = 1e-3 )
 
 # handle accuracy
 def compute_accuracy( outputs, labels ):
-    return 0.0
+    preds = torch.argmax(outputs, dim=1)
+    return ( preds == labels ).float().mean().item()
 
 
 # =========================
@@ -122,7 +141,51 @@ def compute_accuracy( outputs, labels ):
 
 # handle epoch
 def run_one_epoch( model, loader, optimizer = None ):
-    return 0.0, 0.0
+
+    # select computation device
+    device = get_device()
+    model.to( device )
+
+    # loss functionality for 9 tissue class classification
+    loss_fn = get_loss_function()
+
+    total_loss = 0
+    total_acc = 0
+
+    # if no optimizer is given then default to train mode, otherwise eval mode
+    is_train = optimizer is not None
+    model.train() if is_train else model.eval()
+
+    # iterate over images and labels
+    for x, y in loader:
+
+        # move data to computation device
+        x = x.to(device)
+
+        # remove label dimensions and convert integer labels
+        y = y.squeeze().long().to(device)
+
+        # forward pass
+        outputs = model(x)
+
+        # compute loss
+        loss = loss_fn(outputs, y)
+
+
+        # backporpagation and paramter update (for training only)
+        if is_train:
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+        # counter for batch loss
+        total_loss += loss.item()
+
+        # compute batch accuracy
+        total_acc += compute_accuracy( outputs, y )
+
+    # return average loss and accuracy acrosss the full dataset
+    return total_loss / len( loader ), total_acc / len( loader )
 
 # handle training
 def train_model( model, train_loader, val_loader ):
