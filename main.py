@@ -64,27 +64,39 @@ def build_simple_cnn():
             self.fc2 = nn.Linear( 128, 9 )  # MedMNIST has 9 tissue classes
 
         def forward(self, x):
+
             x = F.relu( self.conv1( x ) )
             x = F.max_pool2d (x, 2 )
             x = F.relu( self.conv2( x ))
             x = F.max_pool2d( x, 2 )
             x = x.view(x.size( 0 ), -1 )
             x = F.relu(self.fc1( x ) )
+
             return self.fc2( x )
 
     return SimpleCNN()
 
 # resnet18
 def build_resnet18( pretrained = False ):
-    return None
+
+    model = models.resnet18( pretrained = pretrained )
+    model.fc = nn.Linear( model.fc.in_features, 9 )
+
+    return model
 
 # resnet50
 def build_resnet50( pretrained = False ):
-    return None
+    model = models.resnet50( pretrained = pretrained )
+    model.fc = nn.Linear( model.fc.in_features, 9 )
+    
+    return model
 
 # resnet101
 def build_resnet101( pretrained = False ):
-    return None
+    model = models.resnet101( pretrained = pretrained )
+    model.fc = nn.Linear( model.fc.in_features, 9 )
+    
+    return model
 
 
 # =========================
