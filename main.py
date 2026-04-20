@@ -2,6 +2,11 @@
 # 1. Setup / Configuration
 # =========================
 
+# import dependencies
+from medmnist import PathMNIST
+from torchvision import transforms
+from torch.utils.data import DataLoader
+
 # handle random seed generation
 def set_seed():
     pass
@@ -21,7 +26,15 @@ def get_config():
 
 # handle loading dataset
 def load_dataset():
-    return None
+    transform = transforms.Compose([
+        transforms.ToTensor()
+    ])
+
+    train = PathMNIST( split = "train", transform = transform, download = True)
+    val = PathMNIST( split = "val", transform = transform, download = True)
+    test = PathMNIST( split = "test", transform = transform, download = True)
+
+    return train, val, test
 
 # break data into managable pieces
 def split_dataset( dataset ):
