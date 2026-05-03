@@ -243,7 +243,37 @@ def train_model( model, train_loader, val_loader ):
 
 # evaluate given model based on test data
 def evaluate_model( model, test_loader ):
-    return {}
+
+    device = get_device()
+    model.to( device )
+
+    # evaluation mode
+    model.eval()
+
+    total_loss = 0
+    total_acc = 0
+
+    loss_fn = get_loss_function()
+
+    # disable gradient computation
+    with torch.no_grad():
+
+        for x, y in test_loader:
+
+            x = x.to( device )
+            y = y.squeeze().long().to( device )
+
+            outputs = model(x)
+
+            loss = loss_fn( outputs, y )
+
+            total_loss += loss.item()
+            total_acc += compute_accuracy( outputs, y )
+
+    return {
+        "test_loss": total_loss / len( test_loader ),
+        "test_acc": total_acc / len( test_loader )
+    }
 
 
 # =========================
