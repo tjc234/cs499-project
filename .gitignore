@@ -59,7 +59,6 @@ models/
 weights/
 runs/
 outputs/
-results/
 
 # =========================
 # Dataset Files (optional)
