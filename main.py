@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 
 # select device work is being done on
 def get_device():
-    return "cpu"
+    return "cuda" if torch.cuda.is_available() else "cpu"
 
 # handle getting configuration
 def get_config():
@@ -282,7 +282,45 @@ def evaluate_model( model, test_loader ):
 
 # handle experiments
 def run_experiments():
-    return {}
+
+    # load dataset
+    train_data, val_data, test_data = load_dataset()
+
+    # create loaders
+    train_loader, val_loader, test_loader = create_loaders(
+        train_data, val_data, test_data
+    )
+
+    results = {}
+
+    # dictionary of models to test
+    model_builders = {
+        "SimpleCNN": build_simple_cnn,
+        "ResNet18": build_resnet18,
+        "ResNet50": build_resnet50
+    }
+
+    # iterate through models
+    for name, builder in model_builders.items():
+
+        print( f"\nRunning experiment: {name}" )
+        print( "=" * 50 )
+
+        model = builder()
+
+        # train model
+        model, history = train_model( model, train_loader, val_loader )
+
+        # evaluate model
+        test_metrics = evaluate_model( model, test_loader )
+
+        # store results
+        results[name] = {
+            "history": history,
+            "test_metrics": test_metrics
+        }
+
+    return results
 
 
 # =========================
@@ -290,8 +328,20 @@ def run_experiments():
 # =========================
 
 # compare metrics
-def compare_results(results):
-    pass
+def compare_results( results ):
+    
+    print( "\nFinal Model Comparison" )
+    print( "=" * 50 )
+
+    for name, data in results.items():
+
+        test_loss = data[ "test_metrics" ][ "test_loss" ]
+        test_acc = data[ "test_metrics" ][ "test_acc" ]
+
+        print( f"{name}" )
+        print( f"Test Loss: {test_loss:.4f}" )
+        print( f"Test Acc:  {test_acc:.4f}" )
+        print( "-" * 40 )
 
 
 
