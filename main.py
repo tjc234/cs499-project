@@ -6,6 +6,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import matplotlib.pyplot as plt
 from medmnist import PathMNIST
 from torchvision import transforms, models
 from torch.utils.data import DataLoader
@@ -56,7 +57,7 @@ def build_simple_cnn():
         def __init__( self ):
             super().__init__()
             #  first conv layer, low level features
-            self.conv1 = nn.Conv2d( 1, 16, 3, padding = 1 )
+            self.conv1 = nn.Conv2d( 3, 16, 3, padding = 1 )
 
             # second conv layer, more complex features
             self.conv2 = nn.Conv2d( 16, 32, 3, padding = 1 ) 
@@ -145,6 +146,7 @@ def run_one_epoch( model, loader, optimizer = None ):
 
     # select computation device
     device = get_device()
+    model.to( device )
 
     # loss functionality for 9 tissue class classification
     loss_fn = get_loss_function()
@@ -229,7 +231,7 @@ def train_model( model, train_loader, val_loader ):
         # track best model performance
         if val_acc > best_val_acc:
             best_val_acc = val_acc
-            best_model_state.state_dict()
+            best_model_state = model.state_dict()
 
         # print progress
         print( f"Epoch {epoch+1}/{num_epochs}" )
@@ -237,8 +239,8 @@ def train_model( model, train_loader, val_loader ):
         print( f"Val Loss:   {val_loss:.4f} | Val Acc:   {val_acc:.4f}" )
         print( "-" * 40 )
 
-        if best_model_state is not None:
-            model.load_state_dict( best_model_state )
+    if best_model_state is not None:
+        model.load_state_dict( best_model_state )
 
     return model, history
 
@@ -301,10 +303,11 @@ def run_experiments():
 
     # dictionary of models to test
     model_builders = {
-        "SimpleCNN": build_simple_cnn,
-        "ResNet18": build_resnet18,
-        "ResNet50": build_resnet50
-    }
+    "SimpleCNN": build_simple_cnn,
+    "ResNet18_Scratch": lambda: build_resnet18( pretrained = False ),
+    "ResNet18_Pretrained": lambda: build_resnet18( pretrained = True ),
+    "ResNet50": build_resnet50
+}
 
     # iterate through models
     for name, builder in model_builders.items():
@@ -316,6 +319,8 @@ def run_experiments():
 
         # train model
         model, history = train_model( model, train_loader, val_loader )
+
+        plot_history( history, title = name )
 
         # evaluate model
         test_metrics = evaluate_model( model, test_loader )
@@ -349,6 +354,49 @@ def compare_results( results ):
         print( f"Test Acc:  {test_acc:.4f}" )
         print( "-" * 40 )
 
+        train_acc = data["history"]["train_acc"][-1]
+        val_acc = data["history"]["val_acc"][-1]
+
+        gen_gap = train_acc - val_acc
+
+        print( f"Val Acc:   {val_acc:.4f}" )
+        print( f"Test Acc:  {test_acc:.4f}" )
+        print( f"Gen Gap:   {gen_gap:.4f}" )
+        print( f"Test Loss: {test_loss:.4f}" )
+        print( "-" * 40 )
+
+        print( "Train Loss Curve:", data["history"]["train_loss"] )
+        print( "Val Loss Curve:  ", data["history"]["val_loss"] )
+
+
+# plot results
+def plot_history( history, title = "Training Curves" ):
+
+    epochs = range( 1, len(history["train_loss"]) + 1 )
+
+    # =========================
+    # Loss curve
+    # =========================
+    plt.figure()
+    plt.plot( epochs, history[ "train_loss" ], label = "Train Loss" )
+    plt.plot( epochs, history[ "val_loss" ], label = "Val Loss" )
+    plt.title( f"{title} - Loss" )
+    plt.xlabel( "Epoch" )
+    plt.ylabel( "Loss" )
+    plt.legend()
+    plt.show()
+
+    # =========================
+    # Accuracy curve
+    # =========================
+    plt.figure()
+    plt.plot( epochs, history[ "train_acc" ], label = "Train Acc" )
+    plt.plot( epochs, history[ "val_acc" ], label = "Val Acc" )
+    plt.title( f"{title} - Accuracy" )
+    plt.xlabel( "Epoch" )
+    plt.ylabel( "Accuracy" )
+    plt.legend()
+    plt.show()
 
 
 # =========================
