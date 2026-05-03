@@ -26,6 +26,7 @@ def get_config():
 # handle loading dataset
 def load_dataset():
     transform = transforms.Compose([
+        transforms.Grayscale( num_output_channels = 3 ),
         transforms.ToTensor()
     ])
 
@@ -144,7 +145,6 @@ def run_one_epoch( model, loader, optimizer = None ):
 
     # select computation device
     device = get_device()
-    model.to( device )
 
     # loss functionality for 9 tissue class classification
     loss_fn = get_loss_function()
@@ -208,6 +208,8 @@ def train_model( model, train_loader, val_loader ):
 
     best_val_acc = 0
 
+    best_model_state = None
+
     # iterate over epochs
     for epoch in range( num_epochs ):
 
@@ -227,12 +229,16 @@ def train_model( model, train_loader, val_loader ):
         # track best model performance
         if val_acc > best_val_acc:
             best_val_acc = val_acc
+            best_model_state.state_dict()
 
         # print progress
         print( f"Epoch {epoch+1}/{num_epochs}" )
         print( f"Train Loss: {train_loss:.4f} | Train Acc: {train_acc:.4f}" )
         print( f"Val Loss:   {val_loss:.4f} | Val Acc:   {val_acc:.4f}" )
         print( "-" * 40 )
+
+        if best_model_state is not None:
+            model.load_state_dict( best_model_state )
 
     return model, history
 
