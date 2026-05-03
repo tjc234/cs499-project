@@ -189,7 +189,52 @@ def run_one_epoch( model, loader, optimizer = None ):
 
 # handle training
 def train_model( model, train_loader, val_loader ):
-    return model, {}
+
+    config = get_config()
+    device = get_device()
+
+    model.to( device )
+
+    optimizer = get_optimizer( model )
+
+    num_epochs = 5
+
+    history = {
+        "train_loss": [],
+        "train_acc": [],
+        "val_loss": [],
+        "val_acc": []
+    }
+
+    best_val_acc = 0
+
+    # iterate over epochs
+    for epoch in range( num_epochs ):
+
+        # training phase
+        train_loss, train_acc = run_one_epoch( model, train_loader, optimizer )
+
+        # validation phase
+        with torch.no_grad():
+            val_loss, val_acc = run_one_epoch( model, val_loader )
+
+        # store metrics
+        history[ "train_loss" ].append( train_loss )
+        history[ "train_acc" ].append( train_acc )
+        history[ "val_loss" ].append( val_loss )
+        history[ "val_acc" ].append( val_acc )
+
+        # track best model performance
+        if val_acc > best_val_acc:
+            best_val_acc = val_acc
+
+        # print progress
+        print( f"Epoch {epoch+1}/{num_epochs}" )
+        print( f"Train Loss: {train_loss:.4f} | Train Acc: {train_acc:.4f}" )
+        print( f"Val Loss:   {val_loss:.4f} | Val Acc:   {val_acc:.4f}" )
+        print( "-" * 40 )
+
+    return model, history
 
 
 # =========================
