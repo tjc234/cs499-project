@@ -70,7 +70,7 @@ Each model follows:
 
 ## Training Output:
 
-# Simple CNN
+### Simple CNN
 
 ![Simple CNN Run](results/simplecnnrun.jpg)
 
