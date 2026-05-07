@@ -19,6 +19,8 @@ The goal is to classify histopathology images into 9 tissue classes under the sa
 ## Run the Project
 
 ```bash
+git clone https://github.com/tjc234/cs499-project.git
+cd cs499-project
 pip install -r requirements.txt
 python main.py
 ```
