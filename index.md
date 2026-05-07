@@ -86,7 +86,7 @@ Each model follows:
 
 ## ResNet18 Pretrained Accuracy
 
-![ResNet18 Pretrained Accuracy](results/resnet18precacc.png)
+![ResNet18 Pretrained Accuracy](results/resnet18preacc.png)
 
 ## ResNet18 Pretrained Loss
 
