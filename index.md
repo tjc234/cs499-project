@@ -69,6 +69,43 @@ Each model follows:
 ## Results
 
 ## Training Output
+# Results
+
+## Simple CNN Run
+
+![Simple CNN Run](results/simplecnrun.jpg)
+
+## CNN Accuracy
+
+![CNN Accuracy](results/cnnacc.png)
+
+## CNN Loss
+
+![CNN Loss](results/cnnloss.png)
+
+## ResNet18 Pretrained Accuracy
+
+![ResNet18 Pretrained Accuracy](results/resnet18precacc.png)
+
+## ResNet18 Pretrained Loss
+
+![ResNet18 Pretrained Loss](results/resnet18preloss.png)
+
+## ResNet18 Scratch Accuracy
+
+![ResNet18 Scratch Accuracy](results/resnet18scratchacc.png)
+
+## ResNet18 Scratch Loss
+
+![ResNet18 Scratch Loss](results/resnet18scratchloss.png)
+
+## ResNet50 Accuracy
+
+![ResNet50 Accuracy](results/resnet50acc.png)
+
+## ResNet50 Loss
+
+![ResNet50 Loss](results/resnet50loss.png)
 
 
 ### Final Test Performance
