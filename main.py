@@ -70,17 +70,15 @@ def build_simple_cnn():
 
         def forward(self, x):
 
-            x = F.relu( self.conv1( x ) ) # conv + relu activation
-            x = F.max_pool2d ( x, 2 ) # downsample dimensions while retaining features
+            x = F.relu( self.conv1( x ) ) 
+            x = F.max_pool2d ( x, 2 ) 
 
-            # second feature extraction
             x = F.relu( self.conv2( x )) 
             x = F.max_pool2d( x, 2 )
 
-            x = x.view(x.size( 0 ), -1 ) # flatten feature maps into vector for fully connected layer
-            x = F.relu(self.fc1( x ) ) # dense feature learning
-
-            # return logits for each class
+            x = x.view(x.size( 0 ), -1 ) 
+            x = F.relu(self.fc1( x ) ) 
+            
             return self.fc2( x )
 
     return SimpleCNN()
@@ -172,7 +170,6 @@ def run_one_epoch( model, loader, optimizer = None ):
 
         # compute loss
         loss = loss_fn(outputs, y)
-
 
         # backporpagation and paramter update (for training only)
         if is_train:
