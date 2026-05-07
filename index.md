@@ -68,8 +68,7 @@ Each model follows:
 
 ## Results
 
-## Training Output
-# Results
+## Training Output:
 
 ## Simple CNN Run
 
@@ -82,6 +81,8 @@ Each model follows:
 ## CNN Loss
 
 ![CNN Loss](results/cnnloss.png)
+
+## Plots:
 
 ## ResNet18 Pretrained Accuracy
 
